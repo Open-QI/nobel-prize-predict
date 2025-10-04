@@ -12,8 +12,8 @@ from features import (df,
 
 from mappings import institution_onehot
 
-df = df
-# 保留列
+# 使用 features.py 中已构建的 df
+# 保留列n
 keep_cols = ['original_name','label','birth_year']
 weight_cols = ['internet_weight']
 num_cols = years_before_award_columns + growth_analysis_columns + work_growth_analysis_columns + work_years_before_award_columns + institution_onehot
@@ -59,7 +59,7 @@ print(f"Positive count: {pos_count}, Negative count: {neg_count}, PosRatio: {(po
 
 xgb_cls_model = XGBClassifier(enable_categorical=True, scale_pos_weight=ratio, **initial_hyperparameters)
 xgb_reg_model = XGBRegressor(enable_categorical=True, **initial_hyperparameters)
-cv = StratifiedKFold(n_splits=10, shuffle=True)
+cv = StratifiedKFold(n_splits=10, shuffle=True, random_state=42)
 
 fold_dfs = []
 
@@ -97,8 +97,11 @@ for fold, (train_index, test_index) in enumerate(cv.split(X, y)):
     # 回归模型预测
     y_pred_reg = xgb_reg_model.predict(X_test)
     
-    # 将回归结果缩放到0-1范围
-    y_pred_reg_scaled = (y_pred_reg - y_pred_reg.min()) / (y_pred_reg.max() - y_pred_reg.min())
+    # 将回归结果缩放到0-1范围（避免分母为0）
+    denom = (y_pred_reg.max() - y_pred_reg.min())
+    if denom == 0:
+        denom = 1e-8
+    y_pred_reg_scaled = (y_pred_reg - y_pred_reg.min()) / denom
     
     # 模型融合
     def model_merge(Y_HAT_REG, Y_HAT_CLS, a=3.5, b=1.5, c=0.4):

@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import re
 from typing import List, Dict, Any
@@ -9,7 +10,8 @@ from mappings import gender_map, country_map
 import warnings
 warnings.filterwarnings('ignore')
 
-file_path = "data/nobel_dataset_wiki_sampled_100.csv"
+# Prefer the dataset that actually exists in the repo, allow override via env
+file_path = os.getenv("DATA_CSV", "data/nobel_dataset_sampled_100.csv")
 
 df = pd.read_csv(file_path, header=0)
 

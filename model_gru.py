@@ -1,4 +1,5 @@
 import warnings
+import os
 
 import pandas as pd
 import numpy as np
@@ -335,8 +336,11 @@ def evaluate_model(model, test_loader, device, best_threshold=0.5):
         res = pd.Series(res).rank()/len(res)
         return res
     
-    # 将回归结果缩放到0-1范围
-    y_pred_reg_scaled = (all_reg_preds - all_reg_preds.min()) / (all_reg_preds.max() - all_reg_preds.min())
+    # 将回归结果缩放到0-1范围（避免分母为0）
+    denom = (all_reg_preds.max() - all_reg_preds.min())
+    if denom == 0:
+        denom = 1e-8
+    y_pred_reg_scaled = (all_reg_preds - all_reg_preds.min()) / denom
     
     # 融合预测结果
     y_pred_merged = model_merge(y_pred_reg_scaled, all_cls_preds)
@@ -467,10 +471,14 @@ def plot_roc_curves(all_results):
     plt.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('/app/nob/train_2/roc_curves_gru.png', dpi=300, bbox_inches='tight')
+    # Save to a repo-local output directory
+    out_dir = "outputs"
+    os.makedirs(out_dir, exist_ok=True)
+    out_path = os.path.join(out_dir, 'roc_curves_gru.png')
+    plt.savefig(out_path, dpi=300, bbox_inches='tight')
     plt.show()
     
-    print("\nROC Curves saved to: /app/nob/train_2/roc_curves_gru.png")
+    print(f"\nROC Curves saved to: {out_path}")
     print(f"Classification Model - Mean AUC: {mean_auc:.4f} ± {std_auc:.4f}")
     print(f"Merged Model - Mean AUC: {mean_auc_merged:.4f} ± {std_auc_merged:.4f}")
 

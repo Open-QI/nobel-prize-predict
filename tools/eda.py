@@ -91,8 +91,10 @@ def plot_columns_by_groups_compare(
                 else:
                     A_c = series_A.astype('object').fillna('NaN').astype(str).value_counts(normalize=True)
                     B_c = series_B.astype('object').fillna('NaN').astype(str).value_counts(normalize=True)
-                    all_c = (series_A.astype('object').fillna('NaN').astype(str)
-                             .append(series_B.astype('object').fillna('NaN').astype(str)))
+                    all_c = pd.concat([
+                        series_A.astype('object').fillna('NaN').astype(str),
+                        series_B.astype('object').fillna('NaN').astype(str)
+                    ], axis=0)
                     top_cats = all_c.value_counts().head(top_n_cats).index
                     A_plot = A_c.reindex(top_cats, fill_value=0.0)
                     B_plot = B_c.reindex(top_cats, fill_value=0.0)

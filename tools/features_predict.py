@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import re
 from typing import List, Dict, Any
@@ -9,7 +10,8 @@ from mappings import gender_map, country_map
 import warnings
 warnings.filterwarnings('ignore')
 
-file_path = "data/nobel_dataset_wiki_sampled_100.csv"
+# Prefer the dataset available in-repo; allow override via env
+file_path = os.getenv("DATA_CSV", "data/nobel_dataset_sampled_100.csv")
 
 df = pd.read_csv(file_path, header=0)
 
@@ -35,11 +37,12 @@ df["internet_weight"] = ((df["award_year"] - 1980) // 10).clip(lower=0)
 # 加一个引用量log
 df["total_citations_log"] = np.log1p(df["total_citations"])
 
-df = df[df["data_parts_count"].isin([7, 6, 5, 4, 3, 2])] 
+# Keep consistent with features.py (and be inclusive)
+df = df[df["data_parts_count"].isin([8, 7, 6, 5, 4, 3, 2])] 
 df = df[~pd.isna(df["award_age"])] 
 print(df.shape)
 list_label_2_count = (df['list_lable'] == 2).sum()
-print(f"25df处理后list_label=2的行的个数: {list_label_2_count}")
+print(f"df处理后list_lable=2的行的个数: {list_label_2_count}")
 
 cols = df.columns.tolist()
 

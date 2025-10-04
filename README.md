@@ -33,3 +33,77 @@
 
 ## 模型融合
 同时训练分类器和回归器，并将其结果进行集成融合，提高预测稳定性。
+
+## 如何运行
+
+### 环境准备
+
+本项目可在 CPU 上运行，无需 GPU；若有 CUDA/GPU 可获得更快速度。
+
+**方式 1：使用 uv（推荐）**
+```bash
+uv venv --python 3.11
+source .venv/bin/activate  # Windows: .\.venv\Scripts\activate
+uv pip install -r requirements.txt
+```
+
+**方式 2：使用 pip**
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 数据配置
+
+- 默认使用 `data/nobel_dataset_sampled_100.csv`
+- 可通过环境变量自定义数据路径：
+  ```bash
+  # macOS/Linux
+  export DATA_CSV=/path/to/your.csv
+
+  # Windows PowerShell
+  $env:DATA_CSV="C:\path\to\your.csv"
+  ```
+
+### 模型训练与评估
+
+**1. XGBoost 基线模型**
+```bash
+python model.py
+```
+控制台将输出交叉验证性能指标。
+
+**2. GRU 时序模型**
+```bash
+python model_gru.py
+```
+ROC 曲线将保存至 `outputs/roc_curves_gru.png`。
+
+**3. 生成预测候选特征**
+```bash
+python tools/features_predict.py
+```
+此脚本会：
+- 加载候选学者数据（label=0）
+- 加载 2022-2023 年获奖者数据用于测试验证
+- 输出合并后的特征数据，用于后续预测打分
+
+**4. 探索性数据分析（可选）**
+```bash
+python tools/eda.py
+```
+在 `eda_compare/` 目录下生成分布对比图，便于探索特征差异。
+
+### GPU 加速（可选）
+
+- 代码会自动检测 CUDA(only tests on LINUX CUDA 12.4)，无 GPU 时自动使用 CPU
+- 如需使用 GPU：
+  - 安装对应 CUDA 版本的 PyTorch
+  - 在 XGBoost 中可选设置 `tree_method='gpu_hist'`
+
+### 注意事项
+
+- ⚠️ 请从仓库根目录运行以上命令（代码导入时会进行特征构建）
+- 依赖列表见 `requirements.txt`
+- 如仅需运行 XGBoost 基线模型，可不安装 PyTorch
