@@ -1,0 +1,16 @@
+# Core dependencies
+numpy
+pandas
+
+# Machine Learning
+scikit-learn
+xgboost
+
+# Deep Learning
+torch
+
+# Hyperparameter optimization
+optuna
+
+# Visualization
+matplotlib
